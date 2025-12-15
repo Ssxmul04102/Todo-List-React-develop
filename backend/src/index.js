@@ -1,42 +1,51 @@
 import express from "express";
 import cors from "cors";
+import pool from "../db.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-let tareas = [];
-
-// ✅ Ruta raíz (para evitar "Cannot GET /")
+// Ruta raíz
 app.get("/", (req, res) => {
   res.send("🚀 API Todo funcionando correctamente");
 });
 
-app.get("/tasks", (req, res) => {
-  res.json(tareas);
+// GET tareas
+app.get("/tasks", async (req, res) => {
+  const result = await pool.query(
+    "SELECT * FROM tasks ORDER BY id DESC"
+  );
+  res.json(result.rows);
 });
 
-app.post("/tasks", (req, res) => {
-  const nueva = {
-    id: Date.now(),
-    text: req.body.text,
-    completed: false
-  };
-  tareas.push(nueva);
-  res.status(201).json(nueva);
+// POST tarea
+app.post("/tasks", async (req, res) => {
+  const { text } = req.body;
+  const result = await pool.query(
+    "INSERT INTO tasks (text) VALUES ($1) RETURNING *",
+    [text]
+  );
+  res.status(201).json(result.rows[0]);
 });
 
-app.patch("/tasks/:id", (req, res) => {
-  const id = Number(req.params.id);
-  tareas = tareas.map(t =>
-    t.id === id ? { ...t, completed: !t.completed } : t
+// PATCH completar
+app.patch("/tasks/:id", async (req, res) => {
+  const { id } = req.params;
+  await pool.query(
+    "UPDATE tasks SET completed = NOT completed WHERE id = $1",
+    [id]
   );
   res.json({ ok: true });
 });
 
-app.delete("/tasks/:id", (req, res) => {
-  const id = Number(req.params.id);
-  tareas = tareas.filter(t => t.id !== id);
+// DELETE tarea
+app.delete("/tasks/:id", async (req, res) => {
+  const { id } = req.params;
+  await pool.query(
+    "DELETE FROM tasks WHERE id = $1",
+    [id]
+  );
   res.json({ ok: true });
 });
 
