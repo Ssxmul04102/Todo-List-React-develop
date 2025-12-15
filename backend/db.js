@@ -12,13 +12,20 @@ const pool = new Pool({
   },
 });
 
-// 🔹 Crear tabla automáticamente
-await pool.query(`
-  CREATE TABLE IF NOT EXISTS tasks (
-    id SERIAL PRIMARY KEY,
-    text TEXT NOT NULL,
-    completed BOOLEAN DEFAULT false
-  )
-`);
+export const initDB = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS tasks (
+        id SERIAL PRIMARY KEY,
+        text TEXT NOT NULL,
+        completed BOOLEAN DEFAULT false
+      )
+    `);
+    console.log("✅ Tabla tasks verificada");
+  } catch (error) {
+    console.error("❌ Error inicializando DB:", error);
+    throw error;
+  }
+};
 
 export default pool;

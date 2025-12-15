@@ -1,7 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import pool from "../db.js";
+import pool, { initDB } from "./db.js";
+
 
 const app = express();
 app.use(cors());
@@ -41,6 +42,8 @@ app.delete("/tasks/:id", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+
+app.listen(PORT, async () => {
   console.log(`✅ Backend corriendo en puerto ${PORT}`);
+  await initDB(); // 👈 CLAVE
 });
