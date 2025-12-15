@@ -1,49 +1,100 @@
-import TodoItem from "./TodoItem"
-import { useState } from "react"
+import { useEffect, useState } from "react";
+import TodoItem from "./TodoItem";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function App() {
-
   const [tareas, setTareas] = useState([]);
-
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(true);
 
+  // 🔹 Cargar tareas desde el backend
+  useEffect(() => {
+    fetch(`${API_URL}/tasks`)
+      .then(res => res.json())
+      .then(data => {
+        setTareas(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error cargando tareas:", err);
+        setLoading(false);
+      });
+  }, []);
 
-  const   agregarTarea = () => {
+  // 🔹 Crear tarea
+  const agregarTarea = async () => {
+    if (!input.trim()) return;
 
-    if (input.trim()) {
-      setTareas([...tareas, { id: Date.now(), text: input.trim(), completed: false }]);
-      setInput("");
-    };
+    const res = await fetch(`${API_URL}/tasks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: input })
+    });
 
-  }
+    const nueva = await res.json();
+    setTareas([...tareas, nueva]);
+    setInput("");
+  };
 
+  // 🔹 Completar tarea
+  const toggleCompleted = async (id) => {
+    await fetch(`${API_URL}/tasks/${id}`, {
+      method: "PATCH"
+    });
 
-  const toggleCompleted = (id) => {
     setTareas(
-      tareas.map((tarea) =>
-        tarea.id === id ? { ...tarea, completed: !tarea.completed } : tarea
+      tareas.map(t =>
+        t.id === id ? { ...t, completed: !t.completed } : t
       )
     );
   };
 
+  // 🔹 Eliminar tarea
+  const eliminarTarea = async (id) => {
+    await fetch(`${API_URL}/tasks/${id}`, {
+      method: "DELETE"
+    });
 
-  const eliminarTarea = (id) => {
-    setTareas(tareas.filter((tarea) => tarea.id !== id));
+    setTareas(tareas.filter(t => t.id !== id));
+  };
 
+  if (loading) {
+    return <p className="text-center mt-10">Cargando tareas...</p>;
   }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-2  rounded shadow">
-      <h1 className="text-3xl font-bold mb-5 text-center">APLICACION DE TAREAS</h1>
+    <div className="max-w-md mx-auto mt-10 p-2 rounded shadow">
+      <h1 className="text-3xl font-bold mb-5 text-center">
+        APLICACION DE TAREAS
+      </h1>
+
       <div className="flex gap-3 mb-5">
-        <input className="flex-1 p-2 border rounded" type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Añadir Tarea" />
-        <button className="bg-blue-500 text-white px-4 p-y-2 rounded" onClick={agregarTarea} >Añadir Tareas</button>
+        <input
+          className="flex-1 p-2 border rounded"
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Añadir Tarea"
+        />
+        <button
+          className="bg-blue-500 text-white px-4 rounded"
+          onClick={agregarTarea}
+        >
+          Añadir
+        </button>
       </div>
 
-      <div className="space-y-2 ">
-        {tareas.map((tarea) => (<TodoItem key={tarea.id} tarea={tarea} toggleCompleted={toggleCompleted} eliminarTarea={eliminarTarea} />))}
+      <div className="space-y-2">
+        {tareas.map(tarea => (
+          <TodoItem
+            key={tarea.id}
+            tarea={tarea}
+            toggleCompleted={toggleCompleted}
+            eliminarTarea={eliminarTarea}
+          />
+        ))}
       </div>
-
     </div>
-  )
+  );
 }
