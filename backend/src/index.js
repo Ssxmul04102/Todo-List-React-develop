@@ -7,6 +7,11 @@ app.use(express.json());
 
 let tareas = [];
 
+// ✅ Ruta raíz (para evitar "Cannot GET /")
+app.get("/", (req, res) => {
+  res.send("🚀 API Todo funcionando correctamente");
+});
+
 app.get("/tasks", (req, res) => {
   res.json(tareas);
 });
