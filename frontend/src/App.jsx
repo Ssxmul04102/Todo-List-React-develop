@@ -8,18 +8,21 @@ export default function App() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Cargar tareas desde el backend
+  // 🔹 Cargar tareas
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch(`${API_URL}/tasks`);
+      const data = await res.json();
+      setTareas(data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error cargando tareas:", err);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch(`${API_URL}/tasks`)
-      .then(res => res.json())
-      .then(data => {
-        setTareas(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error cargando tareas:", err);
-        setLoading(false);
-      });
+    fetchTasks();
   }, []);
 
   // 🔹 Crear tarea
@@ -29,7 +32,7 @@ export default function App() {
     const res = await fetch(`${API_URL}/tasks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: input })
+      body: JSON.stringify({ text: input }),
     });
 
     const nueva = await res.json();
@@ -39,9 +42,7 @@ export default function App() {
 
   // 🔹 Completar tarea
   const toggleCompleted = async (id) => {
-    await fetch(`${API_URL}/tasks/${id}`, {
-      method: "PATCH"
-    });
+    await fetch(`${API_URL}/tasks/${id}`, { method: "PATCH" });
 
     setTareas(
       tareas.map(t =>
@@ -50,12 +51,22 @@ export default function App() {
     );
   };
 
-  // 🔹 Eliminar tarea
-  const eliminarTarea = async (id) => {
+  // 🔹 Editar tarea (NUEVO)
+  const editTask = async (id, newText) => {
+    if (!newText.trim()) return;
+
     await fetch(`${API_URL}/tasks/${id}`, {
-      method: "DELETE"
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: newText }),
     });
 
+    fetchTasks();
+  };
+
+  // 🔹 Eliminar tarea
+  const eliminarTarea = async (id) => {
+    await fetch(`${API_URL}/tasks/${id}`, { method: "DELETE" });
     setTareas(tareas.filter(t => t.id !== id));
   };
 
@@ -92,6 +103,7 @@ export default function App() {
             tarea={tarea}
             toggleCompleted={toggleCompleted}
             eliminarTarea={eliminarTarea}
+            editTask={editTask}   
           />
         ))}
       </div>
