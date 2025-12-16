@@ -8,7 +8,7 @@ export default function App() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Cargar tareas
+  //  Cargar tareas
   const fetchTasks = async () => {
     try {
       const res = await fetch(`${API_URL}/tasks`);
@@ -25,7 +25,7 @@ export default function App() {
     fetchTasks();
   }, []);
 
-  // 🔹 Crear tarea
+  //  Crear tarea
   const agregarTarea = async () => {
     if (!input.trim()) return;
 
@@ -40,7 +40,7 @@ export default function App() {
     setInput("");
   };
 
-  // 🔹 Completar tarea
+  //  Completar tarea
   const toggleCompleted = async (id) => {
     await fetch(`${API_URL}/tasks/${id}`, { method: "PATCH" });
 
@@ -51,7 +51,7 @@ export default function App() {
     );
   };
 
-  // 🔹 Editar tarea (NUEVO)
+  //  Editar tarea (NUEVO)
   const editTask = async (id, newText) => {
     if (!newText.trim()) return;
 
@@ -64,7 +64,7 @@ export default function App() {
     fetchTasks();
   };
 
-  // 🔹 Eliminar tarea
+  //  Eliminar tarea
   const eliminarTarea = async (id) => {
     await fetch(`${API_URL}/tasks/${id}`, { method: "DELETE" });
     setTareas(tareas.filter(t => t.id !== id));
@@ -75,7 +75,7 @@ export default function App() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-2 rounded shadow">
+    <div className="max-w-md mx-auto mt-10 p-4 bg-white rounded shadow">
       <h1 className="text-3xl font-bold mb-5 text-center">
         APLICACION DE TAREAS
       </h1>
@@ -96,7 +96,7 @@ export default function App() {
         </button>
       </div>
 
-      <div className="space-y-2">
+      <div className="border rounded bg-white">
         {tareas.map(tarea => (
           <TodoItem
             key={tarea.id}

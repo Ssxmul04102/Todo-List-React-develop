@@ -1,27 +1,32 @@
 import { useState } from "react";
-import { TrashIcon, PencilIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import {
+  TrashIcon,
+  PencilIcon,
+  CheckIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
 
 export default function TodoItem({
   tarea,
   toggleCompleted,
   eliminarTarea,
-  editTask
+  editTask,
 }) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(tarea.text);
 
   const guardar = () => {
+    if (!text.trim()) return;
     editTask(tarea.id, text);
     setEditing(false);
   };
 
   return (
-    <div className="flex justify-between items-center bg-gray-800 text-white p-4 mb-2 rounded">
-      
+    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
       {/* TEXTO / INPUT */}
       {editing ? (
         <input
-          className="flex-1 mr-3 p-1 text-black rounded"
+          className="flex-1 mr-3 px-2 py-1 border rounded text-gray-800"
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && guardar()}
@@ -30,7 +35,9 @@ export default function TodoItem({
       ) : (
         <span
           className={`flex-1 ${
-            tarea.completed ? "line-through text-gray-400" : "text-gray-200"
+            tarea.completed
+              ? "line-through text-gray-400"
+              : "text-gray-800"
           }`}
         >
           {tarea.text}
@@ -38,10 +45,9 @@ export default function TodoItem({
       )}
 
       {/* ACCIONES */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 ml-3">
         {!editing && (
           <input
-            className="w-4 h-4"
             type="checkbox"
             checked={tarea.completed}
             onChange={() => toggleCompleted(tarea.id)}
@@ -50,20 +56,20 @@ export default function TodoItem({
 
         {editing ? (
           <>
-            <button onClick={guardar}>
-              <CheckIcon className="w-5 h-5 text-green-400" />
+            <button onClick={guardar} title="Guardar">
+              <CheckIcon className="w-5 h-5 text-green-500" />
             </button>
-            <button onClick={() => setEditing(false)}>
+            <button onClick={() => setEditing(false)} title="Cancelar">
               <XMarkIcon className="w-5 h-5 text-gray-400" />
             </button>
           </>
         ) : (
-          <button onClick={() => setEditing(true)}>
-            <PencilIcon className="w-5 h-5 text-blue-400" />
+          <button onClick={() => setEditing(true)} title="Editar">
+            <PencilIcon className="w-5 h-5 text-blue-500" />
           </button>
         )}
 
-        <button onClick={() => eliminarTarea(tarea.id)}>
+        <button onClick={() => eliminarTarea(tarea.id)} title="Eliminar">
           <TrashIcon className="w-5 h-5 text-red-500" />
         </button>
       </div>
